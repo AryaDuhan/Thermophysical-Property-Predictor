@@ -3,7 +3,7 @@
 ## Competition Rank
 ![Competition Rank](assests/1771178626991.jpg)
 
-[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.11](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://github.com/AryaDuhan/Thermophysical-Property-Predictor/actions/workflows/tests.yml/badge.svg)](https://github.com/AryaDuhan/Thermophysical-Property-Predictor/actions/workflows/tests.yml)
 
@@ -137,69 +137,71 @@ Weights `w ≥ 0` are learned via NNLS, enforcing monotonicity.
 git clone https://github.com/AryaDuhan/Thermophysical-Property-Predictor.git
 cd Thermophysical-Property-Predictor
 
-# Create environment
-conda create -n hierarchical-mp python=3.10
-conda activate hierarchical-mp
+# Create virtual environment (Python 3.11 required for RDKit/FAISS)
+py -3.11 -m venv .venv
+
+# Activate
+# Windows:
+.venv\Scripts\activate
+# Linux/Mac:
+# source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
+pip install rdkit-pypi faiss-cpu "numpy<2"
 ```
 
+> **Note:** RDKit and FAISS require Python ≤3.12. The repo ships with a pre-trained model so the web app works out of the box.
+
 ### Requirements
-- Python 3.8+
-- NumPy, Pandas, Scikit-learn
-- RDKit (for molecular fingerprints)
-- FAISS (for similarity search)
-- LightGBM (for fallback model)
-- Matplotlib (for visualization)
+- Python 3.11 (recommended)
+- NumPy (<2.0), Pandas, Scikit-learn
+- RDKit (molecular fingerprints)
+- FAISS (similarity search)
+- LightGBM (fallback model)
+- Streamlit (web interface)
 
 ---
 
 ## Quick Start
 
+### Web App (easiest)
+
+```bash
+streamlit run app/app.py
+```
+
+The app ships with a pre-trained model (2,393 molecules). Enter SMILES strings **or common names** (e.g. "benzene", "aspirin") and browse all 2,660 molecules via dropdown.
+
 ### Python API
 
 ```python
-from src.models.hierarchical_mp_v8 import HierarchicalMPPredictorV8
+from src.models.hierarchical_mp_v7 import HierarchicalMPPredictorV7
 
-# Initialize predictor
-predictor = HierarchicalMPPredictorV8(n_regimes=5, alpha=0.10)
-
-# Fit index with training data
-predictor.fit_index(train_smiles, train_tms)
-
-# Calibrate CNU
-predictor.fit_calibration(calib_smiles, calib_tms)
+# Load pre-trained model
+predictor = HierarchicalMPPredictorV7.load("models/v7")
 
 # Predict with uncertainty
 result = predictor.predict("CCO")  # Ethanol
 print(f"Prediction: {result.tm_pred:.1f} K")
 print(f"Interval: [{result.tm_low:.1f}, {result.tm_high:.1f}] K")
 print(f"Method: {result.method}")
-print(f"Uncertainty: {result.u_score:.3f}")
+print(f"Confidence: {result.confidence:.3f}")
+```
+
+### Train Your Own Model
+
+```bash
+# Place competition data in data/raw/
+python scripts/train_model.py
 ```
 
 ### CLI
 
 ```bash
-# Show model info
 python -m src.cli info
-
-# Predict single molecule (requires trained model)
 python -m src.cli predict "CCO" --model models/v7/ --format json
-
-# Batch predict from CSV
 python -m src.cli predict-batch input.csv -o results.csv --model models/v7/
-```
-
-### Web App
-
-```bash
-# Install streamlit
-pip install streamlit
-
-# Run the demo
-streamlit run app/app.py
 ```
 
 ---
@@ -208,7 +210,9 @@ streamlit run app/app.py
 
 ```
 ├── app/
-│   └── app.py                          # Streamlit web demo
+│   └── app.py                          # Streamlit web interface
+├── models/
+│   └── v7/                             # Pre-trained model (ships with repo)
 ├── src/
 │   ├── cli.py                          # Command-line interface
 │   ├── models/
@@ -220,16 +224,13 @@ streamlit run app/app.py
 │   ├── evaluation/
 │   │   └── scaffold_split.py           # Scaffold-based evaluation
 │   └── features/                       # Feature extractors
-├── tests/
-│   ├── test_cnu_calibrator.py          # Uncertainty tests
-│   ├── test_fingerprints.py            # Fingerprint/Tanimoto tests
-│   ├── test_hierarchical_mp.py         # Pipeline tests
-│   └── test_scaffold_split.py          # Scaffold split tests
+├── scripts/
+│   └── train_model.py                  # Model training script
+├── tests/                              # Unit tests
 ├── notebooks/
 │   ├── exploration/                    # EDA & baseline experiments (01-13)
 │   ├── architecture/                   # Model development (14-28)
 │   └── paper/                          # Research paper figures
-├── scripts/                            # Submission generation scripts
 ├── figures/paper/                      # Generated figures
 └── submissions/                        # Kaggle submissions
 ```
@@ -285,10 +286,10 @@ We evaluate under two complementary regimes:
 
 ```bash
 # Run all tests
-python -m pytest tests/ -v
+.venv/Scripts/python -m pytest tests/ -v
 
 # Run specific test suite
-python -m pytest tests/test_cnu_calibrator.py -v
+.venv/Scripts/python -m pytest tests/test_cnu_calibrator.py -v
 ```
 
 ---
