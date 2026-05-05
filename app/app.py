@@ -108,6 +108,20 @@ with st.sidebar:
             predictor = HierarchicalMPPredictorV7.load(model_path)
             model_loaded = True
             st.success(f"HierarchicalMP v7 ({len(predictor.exact_lookup):,} molecules)")
+        except ImportError:
+            # RDKit/FAISS not available — load exact lookup directly from JSON
+            import json as _jl
+            lookup_path = os.path.join(model_path, 'exact_lookup.json')
+            if os.path.exists(lookup_path):
+                with open(lookup_path) as _fl:
+                    _exact_db = _jl.load(_fl)
+                # Override DEMO_DB with the full trained lookup
+                for smi, tm in _exact_db.items():
+                    DEMO_DB[smi] = (smi[:20], float(tm), 'exact_smiles', 0.995)
+                st.success(f"Loaded {len(_exact_db):,} molecules (lite mode)")
+                st.caption("Install RDKit for full model features")
+            else:
+                st.caption("Using reference data")
         except Exception as e:
             st.warning(f"Model load error: {e}")
             st.caption("Using reference data as fallback")
