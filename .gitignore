@@ -1,5 +1,8 @@
-/docs
+# Data files (large)
 /data
+
+# Documentation build
+/docs
 
 # Large model files (exceed GitHub 100MB limit)
 /models/
@@ -13,11 +16,25 @@ __pycache__/
 *.pyc
 *.pyo
 .pytest_cache/
+*.egg-info/
+dist/
+build/
 
 # Jupyter
 .ipynb_checkpoints/
+
+# CatBoost artifacts
+catboost_info/
 
 # Environment
 .env
 .venv/
 venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
