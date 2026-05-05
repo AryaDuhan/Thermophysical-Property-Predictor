@@ -684,8 +684,9 @@ class HierarchicalMPPredictorV7:
             json.dump(self.canonical_list, f)
         
         # Exact lookup
+        serializable_lookup = {k: float(v) for k, v in self.exact_lookup.items()}
         with open(path / 'exact_lookup.json', 'w') as f:
-            json.dump(self.exact_lookup, f)
+            json.dump(serializable_lookup, f)
         
         # Conformal state (dict, not pickle)
         with open(path / 'conformal.json', 'w') as f:

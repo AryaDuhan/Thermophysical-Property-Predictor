@@ -49,6 +49,51 @@ def predict_demo(smiles):
             'low': 298.0 - 78.4, 'high': 298.0 + 78.4}
 
 
+# ── Common name -> SMILES mapping ──
+COMMON_NAMES = {
+    'benzene': 'c1ccccc1', 'toluene': 'c1ccccc1C', 'ethanol': 'CCO',
+    'methanol': 'CO', 'propanol': 'CCCO', 'butanol': 'CCCCO',
+    'phenol': 'c1ccc(O)cc1', 'aniline': 'c1ccc(N)cc1',
+    'acetic acid': 'CC(=O)O', 'acetone': 'CC(=O)C',
+    'aspirin': 'CC(=O)Oc1ccccc1C(=O)O',
+    'caffeine': 'Cn1c(=O)c2c(ncn2C)n(C)c1=O',
+    'glucose': 'OC[C@H]1OC(O)[C@H](O)[C@@H](O)[C@@H]1O',
+    'naphthalene': 'c1ccc2ccccc2c1',
+    'benzoic acid': 'O=C(O)c1ccccc1',
+    'water': 'O', 'ethylene': 'C=C', 'acetylene': 'C#C',
+    'chloroform': 'ClC(Cl)Cl', 'glycerol': 'OCC(O)CO',
+    'urea': 'NC(N)=O', 'formic acid': 'O=CO',
+    'cyclohexane': 'C1CCCCC1', 'pyridine': 'c1ccncc1',
+    'ethyl acetate': 'CC(=O)OCC', 'dimethyl sulfoxide': 'CS(C)=O',
+    'nitrobenzene': 'c1ccc([N+](=O)[O-])cc1',
+    'salicylic acid': 'OC(=O)c1ccccc1O',
+    'ibuprofen': 'CC(C)Cc1ccc(C(C)C(=O)O)cc1',
+}
+
+# Load molecule database from trained model
+import json as _json
+
+MOLECULE_DB = {}
+_mol_names_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'v7', 'molecule_names.json')
+if os.path.exists(_mol_names_path):
+    with open(_mol_names_path) as _f:
+        _raw = _json.load(_f)
+    for smi, info in _raw.items():
+        label = f"{info['formula']} (MW {info['mw']}) - {smi[:50]}"
+        MOLECULE_DB[label] = smi
+
+
+def resolve_input(user_input):
+    """Resolve user input to SMILES. Accepts SMILES or common names."""
+    stripped = user_input.strip()
+    if not stripped:
+        return 'c1ccccc1'
+    lower = stripped.lower()
+    if lower in COMMON_NAMES:
+        return COMMON_NAMES[lower]
+    return stripped
+
+
 # Model loading via sidebar
 model_loaded = False
 predictor = None
@@ -377,8 +422,24 @@ with tab_predict:
     with col_input:
         st.markdown('<div class="card">', unsafe_allow_html=True)
         st.markdown("**Input molecule**")
-        smiles = st.text_input("SMILES", value="c1ccccc1", label_visibility="collapsed",
-                               placeholder="Enter SMILES string...")
+        st.caption("Enter a SMILES string or common name (e.g. 'benzene', 'aspirin')")
+        raw_input = st.text_input("SMILES", value="c1ccccc1", label_visibility="collapsed",
+                               placeholder="SMILES or common name...")
+        smiles = resolve_input(raw_input)
+        if smiles != raw_input:
+            st.caption(f"Resolved: {raw_input} -> `{smiles}`")
+
+        # Dropdown for model molecules
+        if MOLECULE_DB:
+            st.markdown("**Or browse molecules** ({:,} available)".format(len(MOLECULE_DB)))
+            selected = st.selectbox(
+                "Select molecule",
+                options=["(type above or pick here)"] + sorted(MOLECULE_DB.keys()),
+                label_visibility="collapsed",
+            )
+            if selected != "(type above or pick here)":
+                smiles = MOLECULE_DB[selected]
+
         st.markdown("**Quick examples**")
 
         ex_cols = st.columns(4)
