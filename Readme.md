@@ -5,12 +5,13 @@
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://github.com/AryaDuhan/Thermophysical-Property-Predictor/actions/workflows/tests.yml/badge.svg)](https://github.com/AryaDuhan/Thermophysical-Property-Predictor/actions/workflows/tests.yml)
 
 A hierarchical retrieval framework for molecular melting point prediction that achieves **96.8% exact-match coverage** at **948 molecules/second** with **calibrated uncertainty quantification**.
 
 ---
 
-##  Key Results
+## Key Results
 
 | Metric | Value |
 |--------|-------|
@@ -21,7 +22,7 @@ A hierarchical retrieval framework for molecular melting point prediction that a
 
 ---
 
-##  Performance Evolution
+## Performance Evolution
 
 ![Version Evolution](figures/paper/fig1_version_evolution.png)
 
@@ -29,7 +30,7 @@ A hierarchical retrieval framework for molecular melting point prediction that a
 
 ---
 
-##  Architecture
+## Architecture
 
 ### Prediction Hierarchy
 
@@ -65,7 +66,7 @@ Query SMILES
 
 ---
 
-##  Calibrated Neighborhood Uncertainty (CNU)
+## Calibrated Neighborhood Uncertainty (CNU)
 
 Our key theoretical contribution is a **first-principles uncertainty functional** derived from retrieval geometry.
 
@@ -116,7 +117,7 @@ Weights `w ≥ 0` are learned via NNLS, enforcing monotonicity.
 
 ---
 
-##  Data Sources
+## Data Sources
 
 | Source | Molecules | Description |
 |--------|-----------|-------------|
@@ -129,7 +130,7 @@ Weights `w ≥ 0` are learned via NNLS, enforcing monotonicity.
 
 ---
 
-##  Installation
+## Installation
 
 ```bash
 # Clone repository
@@ -154,7 +155,9 @@ pip install -r requirements.txt
 
 ---
 
-##  Quick Start
+## Quick Start
+
+### Python API
 
 ```python
 from src.models.hierarchical_mp_v8 import HierarchicalMPPredictorV8
@@ -170,37 +173,70 @@ predictor.fit_calibration(calib_smiles, calib_tms)
 
 # Predict with uncertainty
 result = predictor.predict("CCO")  # Ethanol
-print(f"Prediction: {result['prediction']:.1f} K")
-print(f"Interval: [{result['interval_low']:.1f}, {result['interval_high']:.1f}] K")
-print(f"Method: {result['method']}")
-print(f"Uncertainty score: {result['uncertainty_score']:.3f}")
+print(f"Prediction: {result.tm_pred:.1f} K")
+print(f"Interval: [{result.tm_low:.1f}, {result.tm_high:.1f}] K")
+print(f"Method: {result.method}")
+print(f"Uncertainty: {result.u_score:.3f}")
+```
+
+### CLI
+
+```bash
+# Show model info
+python -m src.cli info
+
+# Predict single molecule (requires trained model)
+python -m src.cli predict "CCO" --model models/v7/ --format json
+
+# Batch predict from CSV
+python -m src.cli predict-batch input.csv -o results.csv --model models/v7/
+```
+
+### Web App
+
+```bash
+# Install streamlit
+pip install streamlit
+
+# Run the demo
+streamlit run app/app.py
 ```
 
 ---
 
-##  Project Structure
+## Project Structure
 
 ```
+├── app/
+│   └── app.py                          # Streamlit web demo
 ├── src/
+│   ├── cli.py                          # Command-line interface
 │   ├── models/
-│   │   ├── hierarchical_mp_v7.py      # Production model
-│   │   └── hierarchical_mp_v8.py      # CNU-enabled model
-│   └── calibration/
-│       ├── uncertainty_functional.py   # CNU primitives
-│       └── cnu_calibrator.py           # Regime calibration
+│   │   ├── hierarchical_mp_v7.py       # Production model
+│   │   └── hierarchical_mp_v8.py       # CNU-enabled model
+│   ├── calibration/
+│   │   ├── uncertainty_functional.py   # CNU primitives
+│   │   └── cnu_calibrator.py           # Regime calibration
+│   ├── evaluation/
+│   │   └── scaffold_split.py           # Scaffold-based evaluation
+│   └── features/                       # Feature extractors
+├── tests/
+│   ├── test_cnu_calibrator.py          # Uncertainty tests
+│   ├── test_fingerprints.py            # Fingerprint/Tanimoto tests
+│   ├── test_hierarchical_mp.py         # Pipeline tests
+│   └── test_scaffold_split.py          # Scaffold split tests
 ├── notebooks/
-│   ├── 24_research_paper_figures.ipynb # Paper figures
-│   └── 25_cnu_validation.ipynb         # CNU validation
-├── docs/
-│   └── research_paper.tex              # LaTeX paper
+│   ├── exploration/                    # EDA & baseline experiments (01-13)
+│   ├── architecture/                   # Model development (14-28)
+│   └── paper/                          # Research paper figures
+├── scripts/                            # Submission generation scripts
 ├── figures/paper/                      # Generated figures
-├── data/raw/                           # Raw datasets
 └── submissions/                        # Kaggle submissions
 ```
 
 ---
 
-##  Comparison with Deep Learning
+## Comparison with Deep Learning
 
 | Approach | MAE (K) | Note |
 |----------|---------|------|
@@ -213,7 +249,7 @@ Deep learning underperforms due to limited training data (2.6k samples) and lack
 
 ---
 
-##  Two Evaluation Regimes
+## Two Evaluation Regimes
 
 We evaluate under two complementary regimes:
 
@@ -223,7 +259,7 @@ We evaluate under two complementary regimes:
 
 ---
 
-##  Calibration Analysis
+## Calibration Analysis
 
 ![Calibration Analysis](figures/paper/fig4_calibration_analysis.png)
 
@@ -231,7 +267,7 @@ We evaluate under two complementary regimes:
 
 ---
 
-##  Version Evolution
+## Version Evolution
 
 | Version | Exact Match | Throughput | Key Change |
 |---------|-------------|------------|------------|
@@ -245,5 +281,18 @@ We evaluate under two complementary regimes:
 
 ---
 
+## Testing
 
+```bash
+# Run all tests
+python -m pytest tests/ -v
 
+# Run specific test suite
+python -m pytest tests/test_cnu_calibrator.py -v
+```
+
+---
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
