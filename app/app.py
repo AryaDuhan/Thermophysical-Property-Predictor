@@ -54,25 +54,33 @@ model_loaded = False
 predictor = None
 
 with st.sidebar:
-    st.markdown("### Model")
-    model_path = st.text_input(
-        "Model directory",
-        value=os.environ.get('MODEL_PATH', ''),
-        placeholder="path/to/saved/model/",
-        help="Path to a saved HierarchicalMPPredictorV7 model directory"
+    st.markdown("### Model Selection")
+    
+    model_choice = st.radio(
+        "Choose model source:",
+        ["Reference Database (Demo)", "HierarchicalMP v7 (Trained)"],
+        label_visibility="collapsed"
     )
-    if model_path and os.path.exists(model_path):
-        try:
-            from src.models.hierarchical_mp_v7 import HierarchicalMPPredictorV7
-            predictor = HierarchicalMPPredictorV7.load(model_path)
-            model_loaded = True
-            st.success(f"Loaded ({len(predictor.exact_lookup):,} molecules)")
-        except Exception as e:
-            st.error(f"Failed: {e}")
-    elif model_path:
-        st.warning("Path not found")
+    
+    if model_choice == "HierarchicalMP v7 (Trained)":
+        model_path = "models/v7"
+        if os.path.exists(model_path):
+            try:
+                from src.models.hierarchical_mp_v7 import HierarchicalMPPredictorV7
+                predictor = HierarchicalMPPredictorV7.load(model_path)
+                model_loaded = True
+                st.success(f"Model loaded: {len(predictor.exact_lookup):,} molecules")
+            except Exception as e:
+                st.error(f"Failed to load model: {e}")
+        else:
+            st.error("Model not found!")
+            st.markdown(
+                "You haven't trained a model yet. "
+                "Run the training notebook in `notebooks/architecture/` "
+                "or stick to the Reference Database."
+            )
     else:
-        st.caption("No model loaded — using reference data")
+        st.caption("Using pre-computed reference data")
 
     st.markdown("---")
     st.markdown("### About")
