@@ -97,35 +97,23 @@ def resolve_input(user_input):
 # Model loading via sidebar
 model_loaded = False
 predictor = None
+model_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'v7')
 
 with st.sidebar:
-    st.markdown("### Model Selection")
-    
-    model_choice = st.radio(
-        "Choose model source:",
-        ["Reference Database (Demo)", "HierarchicalMP v7 (Trained)"],
-        label_visibility="collapsed"
-    )
-    
-    if model_choice == "HierarchicalMP v7 (Trained)":
-        model_path = "models/v7"
-        if os.path.exists(model_path):
-            try:
-                from src.models.hierarchical_mp_v7 import HierarchicalMPPredictorV7
-                predictor = HierarchicalMPPredictorV7.load(model_path)
-                model_loaded = True
-                st.success(f"Model loaded: {len(predictor.exact_lookup):,} molecules")
-            except Exception as e:
-                st.error(f"Failed to load model: {e}")
-        else:
-            st.error("Model not found!")
-            st.markdown(
-                "You haven't trained a model yet. "
-                "Run the training notebook in `notebooks/architecture/` "
-                "or stick to the Reference Database."
-            )
+    st.markdown("### Model")
+
+    if os.path.exists(os.path.join(model_path, 'config.json')):
+        try:
+            from src.models.hierarchical_mp_v7 import HierarchicalMPPredictorV7
+            predictor = HierarchicalMPPredictorV7.load(model_path)
+            model_loaded = True
+            st.success(f"HierarchicalMP v7 ({len(predictor.exact_lookup):,} molecules)")
+        except Exception as e:
+            st.warning(f"Model load error: {e}")
+            st.caption("Using reference data as fallback")
     else:
-        st.caption("Using pre-computed reference data")
+        st.caption("Using reference data")
+        st.info("Run `python scripts/train_model.py` to train a full model.")
 
     st.markdown("---")
     st.markdown("### About")
