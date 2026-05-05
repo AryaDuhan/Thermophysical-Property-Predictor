@@ -1,14 +1,28 @@
-pandas
-numpy
-scikit-learn
-matplotlib
-seaborn
-rdkit
-xgboost
-lightgbm
-catboost
-torch
-torch_geometric
-optuna
-transformers
-tokenizers
+# Core
+pandas>=1.5,<3.0
+numpy>=1.24,<2.0
+scikit-learn>=1.2
+
+# Visualization
+matplotlib>=3.6
+seaborn>=0.12
+
+# Chemistry
+rdkit>=2023.03
+
+# Tree models
+xgboost>=1.7
+lightgbm>=3.3
+catboost>=1.2
+
+# Similarity search
+faiss-cpu>=1.7
+
+# Optimization
+optuna>=3.0
+
+# Optional: Deep learning (only needed for GNN/transformer experiments)
+# torch>=2.0
+# torch_geometric>=2.3
+# transformers>=4.30
+# tokenizers>=0.13
