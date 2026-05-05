@@ -262,6 +262,22 @@ header[data-testid="stHeader"] { background: transparent; }
 .example-btn:hover strong { color: #fff; }
 
 /* Streamlit overrides */
+button[kind="secondary"] {
+    background: #f7f7f7 !important;
+    border: 1px solid #e5e5e5 !important;
+    border-radius: 10px !important;
+    color: #555 !important;
+    font-family: 'Inter', sans-serif !important;
+    transition: all 0.15s ease !important;
+}
+button[kind="secondary"]:hover, button[kind="secondary"]:active, button[kind="secondary"]:focus {
+    background: #111 !important;
+    color: #fff !important;
+    border-color: #111 !important;
+}
+button[kind="secondary"] p {
+    color: inherit !important;
+}
 .stTextInput > div > div > input {
     border-radius: 12px !important;
     border: 1px solid #ddd !important;
