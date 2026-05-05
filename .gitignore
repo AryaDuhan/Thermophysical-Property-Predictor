@@ -4,12 +4,8 @@
 # Documentation build
 /docs
 
-# Large model files (exceed GitHub 100MB limit)
-/models/
-*.npy
-*.pkl
-*.index
-faiss.index
+# Large files (if any exceed 100MB)
+# *.pkl
 
 # Python cache
 __pycache__/

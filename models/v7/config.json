@@ -1,0 +1,20 @@
+{
+  "version": "7.0",
+  "fp_radius": 2,
+  "fp_bits": 2048,
+  "exact_threshold": 0.95,
+  "similarity_threshold": 0.7,
+  "n_neighbors": 50,
+  "nprobe": 32,
+  "train_mean": 277.5550231933594,
+  "train_std": 84.03041076660156,
+  "provenance": {
+    "n_molecules": 2393,
+    "n_exact_lookup": 2393,
+    "train_mean": 277.5550231933594,
+    "fp_bits": 2048,
+    "fp_radius": 2,
+    "build_time_s": 0.6736893653869629,
+    "data_hash": "e287e40b"
+  }
+}
