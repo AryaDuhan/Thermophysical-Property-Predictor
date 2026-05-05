@@ -1,5 +1,8 @@
 # HierarchicalMP: Data-Centric Molecular Melting Point Prediction
 
+## Competition Rank
+![Competition Rank](assests/1771178626991.jpg)
+
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -130,7 +133,7 @@ Weights `w ≥ 0` are learned via NNLS, enforcing monotonicity.
 
 ```bash
 # Clone repository
-git clone https://github.com/Katakuri004/Thermophysical-Property-Predictor.git
+git clone https://github.com/AryaDuhan/Thermophysical-Property-Predictor.git
 cd Thermophysical-Property-Predictor
 
 # Create environment
